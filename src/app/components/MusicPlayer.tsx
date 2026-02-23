@@ -129,7 +129,7 @@ export function MusicPlayer() {
                 Включить музыку?
               </h3>
               <p className="text-foreground/60 mb-6">
-                Нажмите кнопку, чтобы начать воспроизведение фонвой музыки
+                Нажмите кнопку, чтобы начать воспроизведение
               </p>
               <motion.button
                 onClick={togglePlay}
