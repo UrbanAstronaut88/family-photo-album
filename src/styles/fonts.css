@@ -1,0 +1,23 @@
+/* Импорт шрифтов Google Fonts для более элегантного вида */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap');
+
+:root {
+  /* Основной шрифт - Inter (современный, читабельный) */
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+
+  /* Декоративный шрифт для заголовков - Playfair Display (элегантный) */
+  --font-serif: 'Playfair Display', Georgia, 'Times New Roman', serif;
+}
+
+body {
+  font-family: var(--font-sans);
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3 {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  letter-spacing: -0.02em;
+}
