@@ -1,6 +1,6 @@
-import { useState } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from 'motion/react';
+import { ChevronLeft, ChevronRight, Calendar, MapPin } from 'lucide-react';
 
 interface Photo {
   id: number;
@@ -15,20 +15,49 @@ interface PhotoGalleryProps {
 export function PhotoGallery({ photos }: PhotoGalleryProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [direction, setDirection] = useState(0);
+  const [imageLoaded, setImageLoaded] = useState(false);
 
   const goToPrevious = () => {
     setDirection(-1);
     setCurrentIndex((prev) => (prev === 0 ? photos.length - 1 : prev - 1));
+    setImageLoaded(false);
   };
 
   const goToNext = () => {
     setDirection(1);
     setCurrentIndex((prev) => (prev === photos.length - 1 ? 0 : prev + 1));
+    setImageLoaded(false);
   };
 
   const goToPhoto = (index: number) => {
     setDirection(index > currentIndex ? 1 : -1);
     setCurrentIndex(index);
+    setImageLoaded(false);
+  };
+
+  // Keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowLeft') {
+        goToPrevious();
+      } else if (e.key === 'ArrowRight') {
+        goToNext();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [currentIndex, photos.length]);
+
+  // Swipe detection
+  const handleDragEnd = (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+    const swipeThreshold = 50;
+
+    if (info.offset.x > swipeThreshold) {
+      goToPrevious();
+    } else if (info.offset.x < -swipeThreshold) {
+      goToNext();
+    }
   };
 
   const slideVariants = {
@@ -78,24 +107,47 @@ export function PhotoGallery({ photos }: PhotoGalleryProps) {
               scale: { duration: 0.3 },
             }}
             className="absolute inset-0 flex items-center justify-center"
+            drag="x"
+            dragConstraints={{ left: 0, right: 0 }}
+            dragElastic={0.2}
+            onDragEnd={handleDragEnd}
           >
             <div className="relative w-full h-full flex items-center justify-center">
+              {/* Loading Skeleton */}
+              {!imageLoaded && (
+                <motion.div
+                  className="absolute inset-0 flex items-center justify-center"
+                  initial={{ opacity: 1 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                >
+                  <div className="w-full max-w-3xl h-[60vh] bg-gradient-to-br from-primary/10 via-secondary/10 to-accent/10 rounded-3xl shadow-2xl animate-pulse" />
+                </motion.div>
+              )}
+
               <img
                 src={photos[currentIndex].url}
                 alt={photos[currentIndex].caption}
-                className="max-w-full max-h-full object-contain rounded-3xl shadow-2xl"
+                className={`max-w-full max-h-full object-contain rounded-3xl shadow-2xl transition-opacity duration-500 ${
+                  imageLoaded ? 'opacity-100' : 'opacity-0'
+                }`}
+                onLoad={() => setImageLoaded(true)}
               />
 
-              {/* Caption */}
+              {/* Photo Metadata - улучшенная карточка с glassmorphism */}
               <motion.div
-                className="absolute bottom-8 left-1/2 transform -translate-x-1/2 bg-white/95 backdrop-blur-sm px-8 py-4 rounded-full shadow-xl"
+                className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex flex-col items-center gap-3"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3, duration: 0.5 }}
               >
-                <p className="text-center text-foreground/90 font-light">
-                  {photos[currentIndex].caption}
-                </p>
+
+                {/* Caption */}
+                <div className="bg-gradient-to-r from-primary/90 via-secondary/90 to-accent/90 backdrop-blur-xl px-8 py-4 rounded-full shadow-xl border border-white/40">
+                  <p className="text-center text-white font-light text-lg">
+                    {photos[currentIndex].caption}
+                  </p>
+                </div>
               </motion.div>
             </div>
           </motion.div>
@@ -115,8 +167,8 @@ export function PhotoGallery({ photos }: PhotoGalleryProps) {
           onClick={goToPrevious}
         >
           <motion.div
-            className="nav-hint absolute left-8 top-1/2 -translate-y-1/2 w-14 h-14 bg-white/90 backdrop-blur-md rounded-full shadow-xl flex items-center justify-center opacity-0 transition-opacity duration-300"
-            whileHover={{ scale: 1.1 }}
+            className="nav-hint absolute left-8 top-1/2 -translate-y-1/2 w-14 h-14 bg-white/70 backdrop-blur-2xl rounded-full shadow-2xl flex items-center justify-center opacity-0 transition-all duration-300 border border-white/40"
+            whileHover={{ scale: 1.1, backgroundColor: "rgba(255, 255, 255, 0.9)" }}
             whileTap={{ scale: 0.95 }}
           >
             <ChevronLeft className="w-7 h-7 text-foreground/70" />
@@ -137,8 +189,8 @@ export function PhotoGallery({ photos }: PhotoGalleryProps) {
           onClick={goToNext}
         >
           <motion.div
-            className="nav-hint absolute right-8 top-1/2 -translate-y-1/2 w-14 h-14 bg-white/90 backdrop-blur-md rounded-full shadow-xl flex items-center justify-center opacity-0 transition-opacity duration-300"
-            whileHover={{ scale: 1.1 }}
+            className="nav-hint absolute right-8 top-1/2 -translate-y-1/2 w-14 h-14 bg-white/70 backdrop-blur-2xl rounded-full shadow-2xl flex items-center justify-center opacity-0 transition-all duration-300 border border-white/40"
+            whileHover={{ scale: 1.1, backgroundColor: "rgba(255, 255, 255, 0.9)" }}
             whileTap={{ scale: 0.95 }}
           >
             <ChevronRight className="w-7 h-7 text-foreground/70" />
@@ -175,16 +227,28 @@ export function PhotoGallery({ photos }: PhotoGalleryProps) {
         </motion.div>
       )}
 
-      {/* Counter */}
+      {/* Counter with progress */}
       <motion.div
-        className="absolute top-8 left-1/2 transform -translate-x-1/2 bg-white/80 backdrop-blur-md px-6 py-3 rounded-full shadow-lg z-20"
+        className="absolute top-8 left-1/2 transform -translate-x-1/2 bg-white/70 backdrop-blur-2xl px-6 py-3 rounded-full shadow-2xl z-20 border border-white/40"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 1.2, duration: 0.6 }}
+        whileHover={{ scale: 1.05 }}
       >
-        <p className="text-sm text-foreground/70 font-light">
-          {currentIndex + 1} / {photos.length}
-        </p>
+        <div className="flex items-center gap-3">
+          <p className="text-sm text-foreground/70 font-light">
+            {currentIndex + 1} / {photos.length}
+          </p>
+          {/* Mini progress bar */}
+          <div className="w-20 h-1 bg-primary/20 rounded-full overflow-hidden">
+            <motion.div
+              className="h-full bg-gradient-to-r from-primary to-secondary"
+              initial={{ width: 0 }}
+              animate={{ width: `${((currentIndex + 1) / photos.length) * 100}%` }}
+              transition={{ duration: 0.5, ease: "easeOut" }}
+            />
+          </div>
+        </div>
       </motion.div>
     </div>
   );

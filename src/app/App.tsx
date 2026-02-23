@@ -1,4 +1,4 @@
-import { motion } from 'motion/react';
+import { motion, useScroll, useTransform } from 'motion/react';
 import { PhotoGallery } from './components/PhotoGallery';
 import { MusicPlayer } from './components/MusicPlayer';
 
@@ -280,7 +280,7 @@ export default function App() {
         animate={{ opacity: 1 }}
         transition={{ delay: 1.5, duration: 1 }}
       >
-        <p className="font-light">Coded by Bondarenko Kirill</p>
+        <b className="font-light">Coded by Bondarenko Kirill</b>
       </motion.footer>
     </div>
   );

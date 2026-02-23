@@ -14,8 +14,10 @@ export function MusicPlayer() {
   useEffect(() => {
     if (audioRef.current) {
       audioRef.current.volume = volume;
+      // Sync muted state with audio element
+      audioRef.current.muted = isMuted;
     }
-  }, [volume]);
+  }, [volume, isMuted]);
 
   useEffect(() => {
     // Try to auto-play music when component mounts
@@ -127,7 +129,7 @@ export function MusicPlayer() {
                 Включить музыку?
               </h3>
               <p className="text-foreground/60 mb-6">
-                Нажмите кнопку
+                Нажмите кнопку, чтобы начать воспроизведение фонвой музыки
               </p>
               <motion.button
                 onClick={togglePlay}
@@ -144,11 +146,11 @@ export function MusicPlayer() {
 
       {/* Music Player */}
       <motion.div
-        className="fixed top-8 right-8 z-50 bg-white/90 backdrop-blur-xl rounded-full shadow-2xl p-4 flex items-center gap-4 border border-primary/10"
+        className="fixed top-8 right-8 z-50 bg-white/70 backdrop-blur-2xl rounded-full shadow-2xl p-4 flex items-center gap-4 border border-white/40"
         initial={{ opacity: 0, y: -20, scale: 0.9 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ delay: 1, duration: 0.6, type: "spring", stiffness: 200 }}
-        whileHover={{ scale: 1.05 }}
+        whileHover={{ scale: 1.05, boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)" }}
       >
         <motion.button
           onClick={togglePlay}
